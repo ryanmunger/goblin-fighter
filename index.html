@@ -4,28 +4,49 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Goblin Fighter!</title>
+    <link rel="stylesheet" href="css/rpg-awesome.min.css">
     <style>
       body {
         font-family: sans-serif;
         margin: 0;
         padding: 1rem;
       }
+      [v-cloak] {
+        display: none;
+      }
+      .button {
+        border: 2px solid #666;
+        width: 100%;
+        display: block;
+        font-size: 1.5rem;
+        color: #222;
+        border-radius: 3px;
+        padding: .5rem;
+        margin-bottom: 10px;
+        font-weight: bold;
+      }
+      .button:focus {
+        outline: none;
+      }
+      .button:hover {
+        cursor: pointer;
+      }
     </style>
   </head>
   <body>
     <div id="app">
-      <h3>Goblin Fighter!</h3>
-      <div>
-        Your Hit Points: <strong>{{player.hitPoints}}</strong>
+      <h2 style="margin-bottom: 5px;">Goblin Fighter!</h2>
+      <p style="margin-top: 0; margin-bottom: 0;"><small>A goblin is attacking your village. You chose the shortest straw. Armed with a wooden sword, you must kill the goblin in a nearby cave!</small></p>
+      <hr style="border: none; border-top: 1px solid #ccc; margin-top: 1rem; margin-bottom: 1rem;"/>
+      <div style="margin-bottom: 4px;">
+        Your Hit Points: <strong v-cloak>{{player.hitPoints}}</strong>
       </div>
       <div>
-        Goblin's Hit Points: <strong>{{goblin.hitPoints}}</strong>
+        Goblin's Hit Points: <strong v-cloak>{{goblin.hitPoints}}</strong>
       </div>
       <br />
-      <button v-if="player.hitPoints > 0 && goblin.hitPoints > 0" @click="playerAttack">Attack the Goblin!</button>
-      <button v-if="player.hitPoints <= 0 || goblin.hitPoints <= 0" @click="reset">Play Again!</button>
-      <br />
-      <br />
+      <button class="button attack-button" v-if="player.hitPoints > 0 && goblin.hitPoints > 0" @click="playerAttack">Attack the Goblin! <i class="ra ra-sword"></i></button>
+      <button class="button" v-cloak v-if="player.hitPoints <= 0 || goblin.hitPoints <= 0" @click="reset">Play Again!</button>
       <div v-html="message"></div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
@@ -72,19 +93,20 @@
             if ((this.rollD20() + playerAttackModifier) >= this.goblin.armorClass) {
               this.playerHit();
             } else {
-              this.message = this.message + 'You missed the goblin! <br /><br />';
+              this.message = this.message + '<p>You missed the goblin!</p>';
             }
-            if (this.goblin.hitPoints >= 0) {
+            if (this.goblin.hitPoints >= 1) {
               this.goblinAttack();
             }
           },
           playerHit: function() {
             var playerHitModifier = this.player.modifiers.str;
-            this.goblin.hitPoints = this.goblin.hitPoints - (this.rollD4() + playerHitModifier);
+            var playerHitAmount = (this.rollD4() + playerHitModifier);
+            this.goblin.hitPoints = (this.goblin.hitPoints - playerHitAmount);
             if (this.goblin.hitPoints <= 0) {
-              this.message = this.message + 'You have slain the goblin!<br/><br/>';
+              this.message = this.message + '<p style="color: green;">You hit the goblin for <strong>' + playerHitAmount + ' damage</strong> and kill it.<br /><br /> Your village is safe!</p>';
             } else {
-              this.message = this.message + 'You have hit the goblin! Its current HP is ' + this.goblin.hitPoints + '<br/><br/>';
+              this.message = this.message + '<p style="color: green;">You have hit the goblin for <strong>' + playerHitAmount + ' damage</strong>!</p>';
             }
           },
           goblinAttack: function() {
@@ -93,15 +115,16 @@
               this.goblinHit();
               return;
             };
-            this.message = this.message + 'The goblin tries to attack you, but misses! <br /><br />';
+            this.message = this.message + '<p>The goblin tries to attack you, but misses!</p>';
           },
           goblinHit: function() {
             var goblinHitModifier = this.goblin.modifiers.dex;
-            this.player.hitPoints = this.player.hitPoints - (this.rollD6() + goblinHitModifier);
+            var goblinHitAmount = (this.rollD6() + goblinHitModifier)
+            this.player.hitPoints = (this.player.hitPoints - goblinHitAmount);
             if (this.player.hitPoints <= 0) {
-              this.message = this.message + 'The goblin has killed you!<br/><br/>';
+              this.message = this.message + '<p style="color: red;">The goblin has hit you for <strong>' + goblinHitAmount + ' damage</strong> and killed you.<br /><br /> Your village must send someone else!</strong></p>';
             } else {
-              this.message = this.message + 'The goblin has hit you! Your current HP is ' + this.player.hitPoints + '<br/><br/>';
+              this.message = this.message + '<p style="color: red;">The goblin has hit you for <strong>' + goblinHitAmount + ' damage</strong>.</p>';
             }
           },
           reset: function() {
