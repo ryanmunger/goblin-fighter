@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Goblin Fighter!</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 0;
+        padding: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <h3>Goblin Fighter!</h3>
+      <div>
+        Your Hit Points: <strong>{{player.hitPoints}}</strong>
+      </div>
+      <div>
+        Goblin's Hit Points: <strong>{{goblin.hitPoints}}</strong>
+      </div>
+      <br />
+      <button v-if="player.hitPoints > 0 && goblin.hitPoints > 0" @click="playerAttack">Attack the Goblin!</button>
+      <button v-if="player.hitPoints <= 0 || goblin.hitPoints <= 0" @click="reset">Play Again!</button>
+      <br />
+      <br />
+      <div v-html="message"></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+    <script>
+      function initialState() {
+        return {
+          message: '',
+          goblin: {
+            armorClass: 15,
+            hitPoints: 7,
+            modifiers: {
+              dex: 2
+            },
+            proficiencyBonus: 2
+          },
+          player: {
+            armorClass: 10,
+            hitPoints: 12,
+            modifiers: {
+              dex: 0,
+              str: 3
+            },
+            proficiencyBonus: 2
+          }
+        }
+      }
+      var vm = new Vue({
+        el: '#app',
+        data: function() {
+          return initialState();
+        },
+        methods: {
+          rollD20: function() {
+            return Math.ceil(Math.random() * 20);
+          },
+          rollD4: function() {
+            return Math.ceil(Math.random() * 4);
+          },
+          rollD6: function() {
+            return Math.ceil(Math.random() * 6);
+          },
+          playerAttack: function() {
+            var playerAttackModifier = this.player.proficiencyBonus + this.player.modifiers.str;
+            if ((this.rollD20() + playerAttackModifier) >= this.goblin.armorClass) {
+              this.playerHit();
+            } else {
+              this.message = this.message + 'You missed the goblin! <br /><br />';
+            }
+            if (this.goblin.hitPoints >= 0) {
+              this.goblinAttack();
+            }
+          },
+          playerHit: function() {
+            var playerHitModifier = this.player.modifiers.str;
+            this.goblin.hitPoints = this.goblin.hitPoints - (this.rollD4() + playerHitModifier);
+            if (this.goblin.hitPoints <= 0) {
+              this.message = this.message + 'You have slain the goblin!<br/><br/>';
+            } else {
+              this.message = this.message + 'You have hit the goblin! Its current HP is ' + this.goblin.hitPoints + '<br/><br/>';
+            }
+          },
+          goblinAttack: function() {
+            var goblinAttackModifier = this.goblin.proficiencyBonus + this.goblin.modifiers.dex;
+            if ((this.rollD20() + goblinAttackModifier) >= this.player.armorClass) {
+              this.goblinHit();
+              return;
+            };
+            this.message = this.message + 'The goblin tries to attack you, but misses! <br /><br />';
+          },
+          goblinHit: function() {
+            var goblinHitModifier = this.goblin.modifiers.dex;
+            this.player.hitPoints = this.player.hitPoints - (this.rollD6() + goblinHitModifier);
+            if (this.player.hitPoints <= 0) {
+              this.message = this.message + 'The goblin has killed you!<br/><br/>';
+            } else {
+              this.message = this.message + 'The goblin has hit you! Your current HP is ' + this.player.hitPoints + '<br/><br/>';
+            }
+          },
+          reset: function() {
+            Object.assign(this.$data, initialState())
+          }
+        }
+      })
+    </script>
+  </body>
+</html>
