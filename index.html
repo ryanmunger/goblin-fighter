@@ -93,7 +93,7 @@
             if ((this.rollD20() + playerAttackModifier) >= this.goblin.armorClass) {
               this.playerHit();
             } else {
-              this.message = this.message + '<p>You missed the goblin!</p>';
+              this.message = this.message + '<p>You missed the goblin with your wooden sword!</p>';
             }
             if (this.goblin.hitPoints >= 1) {
               this.goblinAttack();
@@ -104,9 +104,9 @@
             var playerHitAmount = (this.rollD4() + playerHitModifier);
             this.goblin.hitPoints = (this.goblin.hitPoints - playerHitAmount);
             if (this.goblin.hitPoints <= 0) {
-              this.message = this.message + '<p style="color: green;">You hit the goblin for <strong>' + playerHitAmount + ' damage</strong> and kill it.<br /><br /> Your village is safe!</p>';
+              this.message = this.message + '<p style="color: green;">You hit the goblin with your wooden sword for <strong>' + playerHitAmount + ' damage</strong> and kill it.<br /><br /> Your village is safe!</p>';
             } else {
-              this.message = this.message + '<p style="color: green;">You have hit the goblin for <strong>' + playerHitAmount + ' damage</strong>!</p>';
+              this.message = this.message + '<p style="color: green;">You hit the goblin with your wooden sword for <strong>' + playerHitAmount + ' damage</strong>!</p>';
             }
           },
           goblinAttack: function() {
@@ -115,16 +115,16 @@
               this.goblinHit();
               return;
             };
-            this.message = this.message + '<p>The goblin tries to attack you, but misses!</p>';
+            this.message = this.message + '<p>The goblin tries to attack you with its sword, but misses!</p>';
           },
           goblinHit: function() {
             var goblinHitModifier = this.goblin.modifiers.dex;
             var goblinHitAmount = (this.rollD6() + goblinHitModifier)
             this.player.hitPoints = (this.player.hitPoints - goblinHitAmount);
             if (this.player.hitPoints <= 0) {
-              this.message = this.message + '<p style="color: red;">The goblin has hit you for <strong>' + goblinHitAmount + ' damage</strong> and killed you.<br /><br /> Your village must send someone else!</strong></p>';
+              this.message = this.message + '<p style="color: red;">The goblin hits you with its sword for <strong>' + goblinHitAmount + ' damage</strong> and killed you.<br /><br /> Your village must send someone else!</strong></p>';
             } else {
-              this.message = this.message + '<p style="color: red;">The goblin has hit you for <strong>' + goblinHitAmount + ' damage</strong>.</p>';
+              this.message = this.message + '<p style="color: red;">The goblin hits you with its sword for <strong>' + goblinHitAmount + ' damage</strong>.</p>';
             }
           },
           reset: function() {
