@@ -122,7 +122,7 @@
             var goblinHitAmount = (this.rollD6() + goblinHitModifier)
             this.player.hitPoints = (this.player.hitPoints - goblinHitAmount);
             if (this.player.hitPoints <= 0) {
-              this.message = this.message + '<p style="color: red;">The goblin hits you with its sword for <strong>' + goblinHitAmount + ' damage</strong> and killed you.<br /><br /> Your village must send someone else!</strong></p>';
+              this.message = this.message + '<p style="color: red;">The goblin hits you with its sword for <strong>' + goblinHitAmount + ' damage</strong> and kills you.<br /><br /> Your village must send someone else!</strong></p>';
             } else {
               this.message = this.message + '<p style="color: red;">The goblin hits you with its sword for <strong>' + goblinHitAmount + ' damage</strong>.</p>';
             }
