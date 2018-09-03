@@ -35,6 +35,13 @@
       .button:hover {
         cursor: pointer;
       }
+      progress[value] {
+        -webkit-appearance: none;
+        appearance: none;
+      }
+      .goblin-health::-webkit-progress-value {
+        background-color: #8b0000;
+      }
     </style>
   </head>
   <body>
@@ -45,11 +52,15 @@
       <div style="font-size: 1.25rem; margin-bottom: 14px;">
         Total Goblins Killed: <strong v-cloak>{{goblinsKilled}}</strong>
       </div>
-      <div style="margin-bottom: 4px;">
+      <div style="margin-bottom: 14px;">
         Your Hit Points: <strong v-cloak>{{player.hitPoints}}</strong>
+        <br />
+        <progress max="12" :value="player.hitPoints">
       </div>
-      <div>
+      <div style="margin-bottom: 12px;">
         Goblin's Hit Points: <strong v-cloak>{{goblin.hitPoints}}</strong>
+        <br />
+        <progress class="goblin-health" max="7" :value="goblin.hitPoints">
       </div>
       <br />
       <button class="button attack-button" v-if="player.hitPoints > 0 && goblin.hitPoints > 0" @click="playerAttack">Attack the Goblin! <i class="ra ra-sword"></i></button>
@@ -122,7 +133,7 @@
               this.message = this.message + '<p style="color: green;">You hit the goblin with your wooden sword for <strong>' + playerHitAmount + ' damage</strong> and kill it.</p>';
               this.resetGoblin();
               this.goblinsKilled = this.goblinsKilled + 1;
-              this.message = this.message + '<hr style="border: none; border-top: 1px solid #ccc; margin-top: 1rem; margin-bottom: 1rem;"/><p style="color: red;">Oh no! Another goblin is attacking you!</p>';
+              this.message = this.message + '<hr style="border: none; border-top: 1px solid #ccc; margin-top: 1rem; margin-bottom: 1rem;"/><p style="color: red;"><strong>Oh no! Another goblin is attacking you!</strong></p>';
             } else {
               this.message = this.message + '<p style="color: green;">You hit the goblin with your wooden sword for <strong>' + playerHitAmount + ' damage</strong>!</p>';
             }
@@ -140,7 +151,7 @@
             var goblinHitAmount = (this.rollD6() + goblinHitModifier)
             this.player.hitPoints = (this.player.hitPoints - goblinHitAmount);
             if (this.player.hitPoints <= 0) {
-              this.message = this.message + '<p style="color: red;">The goblin hits you with its sword for <strong>' + goblinHitAmount + ' damage</strong> and kills you.<br /><hr style="border: none; border-top: 1px solid #ccc; margin-top: 1rem; margin-bottom: 1rem;" />Your village must send someone else!</strong></p>';
+              this.message = this.message + '<p style="color: red;">The goblin hits you with its sword for <strong>' + goblinHitAmount + ' damage</strong> and kills you.<br /><hr style="border: none; border-top: 1px solid #ccc; margin-top: 1rem; margin-bottom: 1rem;" /><strong style="color: #666;">Your village must send someone else!</strong></p>';
             } else {
               this.message = this.message + '<p style="color: red;">The goblin hits you with its sword for <strong>' + goblinHitAmount + ' damage</strong>.</p>';
             }
