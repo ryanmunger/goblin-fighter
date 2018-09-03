@@ -63,12 +63,24 @@
         <progress class="goblin-health" max="7" :value="goblin.hitPoints">
       </div>
       <br />
-      <button class="button attack-button" v-if="player.hitPoints > 0 && goblin.hitPoints > 0" @click="playerAttack">Attack the Goblin! <i class="ra ra-sword"></i></button>
+      <button class="button attack-button" v-if="player.hitPoints > 0 && goblin.hitPoints > 0" @click="nextRound">Attack the Goblin! <i class="ra ra-sword"></i></button>
       <button class="button" v-cloak v-if="player.hitPoints <= 0" @click="resetGame">Play Again!</button>
       <div v-html="message"></div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
     <script>
+      const constants = {
+        HEADS: 'HEADS',
+        TAILS: 'TAILS',
+        FREE_POTION_LIMIT: 18,
+        MAX_PLAYER_HEALTH: 12
+      };
+      const {
+        HEADS,
+        TAILS,
+        FREE_POTION_LIMIT,
+        MAX_PLAYER_HEALTH
+      } = constants;
       function initialState() {
         return {
           message: '',
@@ -84,7 +96,7 @@
           },
           player: {
             armorClass: 10,
-            hitPoints: 12,
+            hitPoints: MAX_PLAYER_HEALTH,
             modifiers: {
               dex: 0,
               str: 3
@@ -108,6 +120,13 @@
           },
           rollD6: function() {
             return Math.ceil(Math.random() * 6);
+          },
+          flipCoin: function() {
+            return Math.random() >= 0.5 ? HEADS : TAILS;
+          },
+          nextRound: function() {
+            this.playerAttack();
+            this.surpriseItems();
           },
           playerAttack: function() {
             this.message = '';
@@ -154,6 +173,22 @@
               this.message = this.message + '<p style="color: red;">The goblin hits you with its sword for <strong>' + goblinHitAmount + ' damage</strong> and kills you.<br /><hr style="border: none; border-top: 1px solid #ccc; margin-top: 1rem; margin-bottom: 1rem;" /><strong style="color: #666;">Your village must send someone else!</strong></p>';
             } else {
               this.message = this.message + '<p style="color: red;">The goblin hits you with its sword for <strong>' + goblinHitAmount + ' damage</strong>.</p>';
+            }
+          },
+          surpriseItems: function() {
+            // If u ded, u ded.
+            if (this.player.hitPoints <= 0) {
+              return;
+            }
+            
+            // Luck check go!
+            if (this.rollD20() > FREE_POTION_LIMIT) {
+              // More luck check to see how much health the player gets back
+              const isFullRecovery =  this.flipCoin() === HEADS;
+              const recoveredHP = isFullRecovery ? MAX_PLAYER_HEALTH : 5;
+
+              this.player.hitPoints = Math.min(this.player.hitPoints + recoveredHP, MAX_PLAYER_HEALTH);
+              this.message = this.message + '<p style="color: blue;">The goblin dropped a potion! You recovered <strong>' + recoveredHP + ' HP</strong>!</p>'
             }
           },
           resetGame: function() {
