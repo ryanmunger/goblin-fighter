@@ -39,9 +39,12 @@
   </head>
   <body>
     <div id="app">
-      <h2 style="margin-bottom: 5px;">Goblin Fighter!</h2>
-      <p style="margin-top: 0; margin-bottom: 0;"><small>A goblin has been attacking your village. You chose the shortest straw. Armed with a wooden sword, you must kill the goblin in its nearby cave!</small></p>
+      <h1 style="margin-bottom: 5px;">Goblin Fighter!</h1>
+      <p style="margin-top: 0; margin-bottom: 0;"><small>Goblins have been attacking your village. You chose the shortest straw. Armed with a wooden sword, you must kill the goblins in their nearby cave!</small></p>
       <hr style="border: none; border-top: 1px solid #ccc; margin-top: 1rem; margin-bottom: 1rem;"/>
+      <div style="font-size: 1.25rem; margin-bottom: 14px;">
+        Total Goblins Killed: <strong v-cloak>{{goblinsKilled}}</strong>
+      </div>
       <div style="margin-bottom: 4px;">
         Your Hit Points: <strong v-cloak>{{player.hitPoints}}</strong>
       </div>
@@ -50,7 +53,7 @@
       </div>
       <br />
       <button class="button attack-button" v-if="player.hitPoints > 0 && goblin.hitPoints > 0" @click="playerAttack">Attack the Goblin! <i class="ra ra-sword"></i></button>
-      <button class="button" v-cloak v-if="player.hitPoints <= 0 || goblin.hitPoints <= 0" @click="reset">Play Again!</button>
+      <button class="button" v-cloak v-if="player.hitPoints <= 0" @click="resetGame">Play Again!</button>
       <div v-html="message"></div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
@@ -58,8 +61,10 @@
       function initialState() {
         return {
           message: '',
+          goblinsKilled: 0,
           goblin: {
             armorClass: 15,
+            firstAttack: true,
             hitPoints: 7,
             modifiers: {
               dex: 2
@@ -74,7 +79,8 @@
               str: 3
             },
             proficiencyBonus: 2
-          }
+          },
+          resetGoblinPhase: false
         }
       }
       var vm = new Vue({
@@ -93,11 +99,16 @@
             return Math.ceil(Math.random() * 6);
           },
           playerAttack: function() {
+            this.message = '';
             var playerAttackModifier = this.player.proficiencyBonus + this.player.modifiers.str;
             if ((this.rollD20() + playerAttackModifier) >= this.goblin.armorClass) {
               this.playerHit();
             } else {
               this.message = this.message + '<p>You missed the goblin with your wooden sword!</p>';
+            }
+            if (this.resetGoblinPhase === true) {
+              this.resetGoblinPhase = false;
+              return;
             }
             if (this.goblin.hitPoints >= 1) {
               this.goblinAttack();
@@ -108,7 +119,10 @@
             var playerHitAmount = (this.rollD4() + playerHitModifier);
             this.goblin.hitPoints = (this.goblin.hitPoints - playerHitAmount);
             if (this.goblin.hitPoints <= 0) {
-              this.message = this.message + '<p style="color: green;">You hit the goblin with your wooden sword for <strong>' + playerHitAmount + ' damage</strong> and kill it.<br /><br /> Your village is safe!</p>';
+              this.message = this.message + '<p style="color: green;">You hit the goblin with your wooden sword for <strong>' + playerHitAmount + ' damage</strong> and kill it.</p>';
+              this.resetGoblin();
+              this.goblinsKilled = this.goblinsKilled + 1;
+              this.message = this.message + '<hr style="border: none; border-top: 1px solid #ccc; margin-top: 1rem; margin-bottom: 1rem;"/><p style="color: red;">Oh no! Another goblin is attacking you!</p>';
             } else {
               this.message = this.message + '<p style="color: green;">You hit the goblin with your wooden sword for <strong>' + playerHitAmount + ' damage</strong>!</p>';
             }
@@ -126,13 +140,20 @@
             var goblinHitAmount = (this.rollD6() + goblinHitModifier)
             this.player.hitPoints = (this.player.hitPoints - goblinHitAmount);
             if (this.player.hitPoints <= 0) {
-              this.message = this.message + '<p style="color: red;">The goblin hits you with its sword for <strong>' + goblinHitAmount + ' damage</strong> and kills you.<br /><br /> Your village must send someone else!</strong></p>';
+              this.message = this.message + '<p style="color: red;">The goblin hits you with its sword for <strong>' + goblinHitAmount + ' damage</strong> and kills you.<br /><hr style="border: none; border-top: 1px solid #ccc; margin-top: 1rem; margin-bottom: 1rem;" />Your village must send someone else!</strong></p>';
             } else {
               this.message = this.message + '<p style="color: red;">The goblin hits you with its sword for <strong>' + goblinHitAmount + ' damage</strong>.</p>';
             }
           },
-          reset: function() {
+          resetGame: function() {
             Object.assign(this.$data, initialState())
+          },
+          resetGoblin: function() {
+            Object.assign(
+              this.$data.goblin,
+              this.goblin.hitPoints = 7,
+              this.resetGoblinPhase = true
+            )
           }
         }
       })
