@@ -177,7 +177,10 @@
           },
           surpriseItems: function() {
             // If u ded, u ded.
+            // If u live, u live.
             if (this.player.hitPoints <= 0) {
+              return;
+            } else if (this.player.hitPoints >= MAX_PLAYER_HEALTH) {
               return;
             }
             
