@@ -83,7 +83,8 @@
       } = constants;
       function initialState() {
         return {
-          message: '',
+          message: '<p><strong>THE HOLY WAR OF MAN VERSUS GOBLIN HAS BEGUN</strong></p>',
+          messages: [],
           goblinsKilled: 0,
           goblin: {
             armorClass: 15,
@@ -127,17 +128,48 @@
           remainingHitPoints: function(hp, damage) {
             return Math.max(hp - damage, 0);
           },
+          addMessage: function(message) {
+            this.messages.push(message);
+          },
+          clearMessage: function() {
+            this.message = '';
+          },
+          publishMessage: function() {
+            this.message = this.messages.join('\n');
+          },
+          flushMessages: function() {
+            this.messages = [];
+          },
+          generateMessage: function(text, type = 'info') {
+            if (type === 'divider') {
+              return '<hr style="border: none; border-top: 1px solid #ccc; margin-top: 1rem; margin-bottom: 1rem;" />';
+            } else if (type === 'positive') {
+              return '<p style="color: green;">' + text + '</p>';
+            } else if (type === 'negative') {
+              return '<p style="color: red;">' + text + '</p>';
+            } else if (type === 'event') {
+              return '<p style="color: blue;">' + text + '</p>';
+            } else if (type === 'emphasized') {
+              return '<strong style="color: #666;">' + text + '</strong>';
+            }
+
+            return '<p>' + text + '</p>';
+          },
           nextRound: function() {
+            this.clearMessage();
+            this.flushMessages();
+
             this.playerAttack();
             this.surpriseItems();
+            
+            this.publishMessage();
           },
           playerAttack: function() {
-            this.message = '';
             var playerAttackModifier = this.player.proficiencyBonus + this.player.modifiers.str;
             if ((this.rollD20() + playerAttackModifier) >= this.goblin.armorClass) {
               this.playerHit();
             } else {
-              this.message = this.message + '<p>You missed the goblin with your wooden sword!</p>';
+              this.addMessage(this.generateMessage('You missed the goblin with your wooden sword!'));
             }
             if (this.resetGoblinPhase === true) {
               this.resetGoblinPhase = false;
@@ -153,12 +185,14 @@
             this.goblin.hitPoints = this.remainingHitPoints(this.goblin.hitPoints, playerHitAmount);
 
             if (this.goblin.hitPoints === 0) {
-              this.message = this.message + '<p style="color: green;">You hit the goblin with your wooden sword for <strong>' + playerHitAmount + ' damage</strong> and kill it.</p>';
               this.resetGoblin();
               this.goblinsKilled = this.goblinsKilled + 1;
-              this.message = this.message + '<hr style="border: none; border-top: 1px solid #ccc; margin-top: 1rem; margin-bottom: 1rem;"/><p style="color: red;"><strong>Oh no! Another goblin is attacking you!</strong></p>';
+              
+              this.addMessage(this.generateMessage('You hit the goblin with your wooden sword for <strong>' + playerHitAmount + ' damage</strong> and kill it.', 'positive'));
+              this.addMessage(this.generateMessage('', 'divider'));
+              this.addMessage(this.generateMessage('<strong>Oh no! Another goblin is attacking you!</strong>', 'negative'));
             } else {
-              this.message = this.message + '<p style="color: green;">You hit the goblin with your wooden sword for <strong>' + playerHitAmount + ' damage</strong>!</p>';
+              this.addMessage(this.generateMessage('You hit the goblin with your wooden sword for <strong>' + playerHitAmount + ' damage</strong>!', 'positive'));
             }
           },
           goblinAttack: function() {
@@ -167,7 +201,7 @@
               this.goblinHit();
               return;
             };
-            this.message = this.message + '<p>The goblin tries to attack you with its sword, but misses!</p>';
+            this.addMessage(this.generateMessage('The goblin tries to attack you with its sword, but misses!'));
           },
           goblinHit: function() {
             var goblinHitModifier = this.goblin.modifiers.dex;
@@ -175,9 +209,11 @@
             this.player.hitPoints = this.remainingHitPoints(this.player.hitPoints, goblinHitAmount);
             
             if (this.player.hitPoints === 0) {
-              this.message = this.message + '<p style="color: red;">The goblin hits you with its sword for <strong>' + goblinHitAmount + ' damage</strong> and kills you.<br /><hr style="border: none; border-top: 1px solid #ccc; margin-top: 1rem; margin-bottom: 1rem;" /><strong style="color: #666;">Your village must send someone else!</strong></p>';
+              this.addMessage(this.generateMessage('The goblin hits you with its sword for <strong>' + goblinHitAmount + ' damage</strong> and kills you.', 'negative'));
+              this.addMessage(this.generateMessage('', 'divider'));
+              this.addMessage(this.generateMessage('Your village must send someone else!', 'emphasized'));
             } else {
-              this.message = this.message + '<p style="color: red;">The goblin hits you with its sword for <strong>' + goblinHitAmount + ' damage</strong>.</p>';
+              this.addMessage(this.generateMessage('The goblin hits you with its sword for <strong>' + goblinHitAmount + ' damage</strong>.', 'negative'));
             }
           },
           surpriseItems: function() {
@@ -196,7 +232,7 @@
               const recoveredHP = isFullRecovery ? MAX_PLAYER_HEALTH : 5;
 
               this.player.hitPoints = Math.min(this.player.hitPoints + recoveredHP, MAX_PLAYER_HEALTH);
-              this.message = this.message + '<p style="color: blue;">The goblin dropped a potion! You recovered <strong>' + recoveredHP + ' HP</strong>!</p>'
+              this.addMessage(this.generateMessage('The goblin dropped a potion! You recovered <strong>' + recoveredHP + ' HP</strong>!', 'event'));
             }
           },
           resetGame: function() {
